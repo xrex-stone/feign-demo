@@ -1,0 +1,37 @@
+server:
+  port : 8001
+
+internal:
+  server:
+    url: http://127.0.0.1:8000/
+    token: 123456
+
+# enable our client with logging debug to show logging in detail
+logging:
+  level:
+    github.com.stone.client: DEBUG
+
+spring:
+  cloud:
+    openfeign:
+      httpclient:
+        max-connections-per-route: 50
+        max-connections: 200
+        hc5:
+          enabled: true
+          # socket-timeout: 40000
+          # socket-timeout-unit: MILLISECONDS
+          #          pool-reuse-policy:
+          # pool-concurrency-policy:
+      client:
+        config:
+          # openfeign default setting
+          default:
+            connectTimeout: 5000
+            readTimeout: 5000
+            loggerLevel: basic
+          # our client setting
+          serverApiClient:
+            connectTimeout: 3000
+            readTimeout: 3000
+            loggerLevel: full
