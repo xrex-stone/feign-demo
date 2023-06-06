@@ -40,6 +40,13 @@ public class ServerApiClientTest {
     }
 
     @Test
+    public void testNotFound() {
+        ServerApiClient.TodoItem returnTodo = serverApiClient.notFound();
+
+        System.out.println(returnTodo);
+    }
+
+    @Test
     public void testLongQuery() {
         Response response = serverApiClient.longQuery();
         System.out.println(response);

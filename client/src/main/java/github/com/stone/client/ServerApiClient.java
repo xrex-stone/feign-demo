@@ -2,12 +2,16 @@ package github.com.stone.client;
 
 import feign.RequestInterceptor;
 import feign.Response;
+import github.com.stone.client.ServerApiClient.Fallback;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,8 +21,10 @@ import java.util.List;
 
 @FeignClient(name="serverApiClient",
         url = "${internal.server.url}" ,
-        configuration = ServerApiClient.ServerApiClientConfiguration.class
+        configuration = ServerApiClient.ServerApiClientConfiguration.class,
+        fallback = Fallback.class
         )
+@Primary
 public interface ServerApiClient {
 
     @GetMapping("/long_query")
@@ -29,6 +35,9 @@ public interface ServerApiClient {
 
     @PostMapping("/todo")
     TodoItem createTodo(@RequestBody TodoItem todoItem);
+
+    @PostMapping("/not_found")
+    TodoItem notFound();
 
     class ServerApiClientConfiguration {
 
@@ -42,18 +51,30 @@ public interface ServerApiClient {
             };
         }
 
+    }
 
-        /* if you need a custom HTTP client
-        @Bean
-        public Feign.Builder feignBuilder() {
-            ApacheHttp5Client hc5 = new ApacheHttp5Client();
+    @Component
+    class Fallback implements ServerApiClient {
 
-            return Feign.builder()
-                    .retryer(Retryer.NEVER_RETRY)
-                    .client(hc5);
+        @Override
+        public Response longQuery() {
+            return null;
         }
-         */
 
+        @Override
+        public List<TodoItem> listTodo() {
+            return null;
+        }
+
+        @Override
+        public TodoItem createTodo(TodoItem todoItem) {
+            return null;
+        }
+
+        @Override
+        public TodoItem notFound() {
+            return new TodoItem(UUID.randomUUID().toString(), "mock schedule", "this is return from fallback", LocalDateTime.now());
+        }
     }
 
     @Data
